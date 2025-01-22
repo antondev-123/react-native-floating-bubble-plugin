@@ -23,6 +23,7 @@ export const hideFloatingBubble = () => FloatingBubble.hideFloatingBubble();
 export const checkPermission = () => FloatingBubble.checkPermission();
 export const requestPermission = () => FloatingBubble.requestPermission();
 export const initialize = () => FloatingBubble.initialize();
+export const isBubbleVisible = () => FloatingBubble.isBubbleVisible();
 export default {
   showFloatingBubble,
   hideFloatingBubble,
@@ -30,4 +31,5 @@ export default {
   checkPermission,
   initialize,
   reopenApp,
+  isBubbleVisible,
 };

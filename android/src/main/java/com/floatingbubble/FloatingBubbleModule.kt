@@ -22,6 +22,8 @@ class FloatingBubbleModule
     (private val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
     private var bubblesManager: BubblesManager? = null
     private var bubbleView: BubbleLayout? = null
+    private var isInitialized: Boolean = false // Flag to track initialization
+    private var pendingActions: MutableList<() -> Unit> = mutableListOf()
 
     @ReactMethod
     fun reopenApp() {
@@ -41,12 +43,20 @@ class FloatingBubbleModule
 
     @ReactMethod // Notates a method that should be exposed to React
     fun showFloatingBubble(x: Int, y: Int, promise: Promise) {
-        Log.d("Test", "my Message")
+     if (!isInitialized) {
+            // If not initialized, queue the action
+            pendingActions.add {
+                addNewBubble(x, y)
+            }
+            promise.resolve("Initialization pending")
+            return
+        }
+
+        // If initialized, proceed with adding bubble
         try {
             this.addNewBubble(x, y)
-            promise.resolve("")
         } catch (e: Exception) {
-            promise.reject("")
+            promise.reject("Error adding bubble", e)
         }
     }
 
@@ -87,18 +97,37 @@ class FloatingBubbleModule
         }
     }
 
+    @ReactMethod
+    fun isBubbleVisible(promise: Promise) {
+        try {
+            val isVisible = bubbleView != null
+            promise.resolve(isVisible)
+        } catch (e: Exception) {
+            promise.reject("Error checking bubble visibility", e)
+        }
+    }
+
     private fun addNewBubble(x: Int, y: Int) {
         this.removeBubble()
-        bubbleView =
-            LayoutInflater.from(reactContext).inflate(R.layout.bubble_layout, null) as BubbleLayout
-        bubbleView!!.setOnBubbleRemoveListener {
-            bubbleView = null
-            sendEvent("floating-bubble-remove")
+         try {
+            bubbleView = LayoutInflater.from(reactContext).inflate(R.layout.bubble_layout, null) as BubbleLayout
+            
+            // Set up listeners and behaviors for the new bubble
+            bubbleView!!.setOnBubbleRemoveListener {
+                bubbleView = null
+                sendEvent("floating-bubble-remove") // Send event when bubble is removed
+            }
+            bubbleView!!.setOnBubbleClickListener {
+                sendEvent("floating-bubble-press") // Send event when bubble is clicked
+            }
+            bubbleView!!.setShouldStickToWall(true) // Ensure bubble sticks to the wall
+
+            // Add the new bubble to the BubblesManager at the specified position
+            bubblesManager!!.addBubble(bubbleView, x, y)
+        } catch (e: Exception) {
+            // Catch any errors during bubble creation and reject the promise
+              Log.d("permison", "eject")
         }
-        bubbleView!!.setOnBubbleClickListener { sendEvent("floating-bubble-press") }
-        bubbleView!!.setShouldStickToWall(true)
-        Log.d("bubblesManager", "aaa");
-        bubblesManager!!.addBubble(bubbleView, x, y)
     }
 
     private fun hasPermission(): Boolean {
@@ -142,6 +171,7 @@ class FloatingBubbleModule
             BubblesManager.Builder(reactContext).setTrashLayout(R.layout.bubble_trash_layout)
                 .setInitializationCallback {
                     // addNewBubble();
+                    isInitialized = true;
                 }.build()
             bubblesManager!!.initialize()
 

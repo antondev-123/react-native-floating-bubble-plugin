@@ -98,6 +98,16 @@ public class RNFloatingBubbleModule extends ReactContextBaseJavaModule {
       promise.reject("");
     }
   }  
+  @ReactMethod // Notates a method that should be exposed to React
+  public void isBubbleVisible(final Promise promise) {
+    try {
+      // Check if bubbleView is not null
+      boolean isVisible = bubbleView != null;
+      promise.resolve(isVisible); // Resolve the promise with the visibility status
+    } catch (Exception e) {
+      promise.reject("ERROR", "Failed to check bubble visibility", e);
+    }
+  }  
 
   private void addNewBubble(int x, int y) {
     this.removeBubble();

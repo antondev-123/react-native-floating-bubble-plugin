@@ -26,6 +26,7 @@ import {
   requestPermission,
   initialize,
   checkPermission,
+  isBubbleVisible,
 } from 'react-native-floating-bubble-plugin';
 
 const showToast = (text: string) => ToastAndroid.show(text, 1000);
@@ -56,6 +57,16 @@ function App(): React.JSX.Element {
     initialize()
       .then(() => showToast('Init'))
       .catch(() => showToast('Failed init'));
+  const isBubble = () =>
+    isBubbleVisible()
+      .then((isVisible: boolean) => {
+        if (isVisible) {
+          showToast('Bubble is visible.');
+        } else {
+          showToast('Bubble is invisible.');
+        }
+      })
+      .catch(() => showToast('None'));
   useEffect(() => {
     const subscriptionPress = DeviceEventEmitter.addListener(
       'floating-bubble-press',
@@ -100,6 +111,8 @@ function App(): React.JSX.Element {
           <Button title="Add Bubble" onPress={onAdd} />
           <Text>Remove the bubble</Text>
           <Button title="Hide Bubble" onPress={onHide} />
+          <Text>Is Bubble visible</Text>
+          <Button title="Is Bubble" onPress={isBubble} />
         </View>
       </ScrollView>
     </SafeAreaView>

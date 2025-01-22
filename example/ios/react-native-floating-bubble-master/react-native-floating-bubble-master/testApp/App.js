@@ -16,7 +16,7 @@ import {
   Text,
   StatusBar,
   ToastAndroid,
-  DeviceEventEmitter
+  DeviceEventEmitter,
 } from 'react-native';
 
 import {
@@ -27,47 +27,92 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
-import { showFloatingBubble, hideFloatingBubble, requestPermission, checkPermission, initialize } from "react-native-floating-bubble-plugin"
+import {
+  showFloatingBubble,
+  hideFloatingBubble,
+  requestPermission,
+  checkPermission,
+  initialize,
+  isBubbleVisible,
+} from 'react-native-floating-bubble-plugin';
 
-const showToast = text => ToastAndroid.show(text, 1000)
+const showToast = (text) => ToastAndroid.show(text, 1000);
 
 const App = () => {
-  const onAdd = () => showFloatingBubble().then(() => showToast("Add Floating Button"))
-  const onHide = () => hideFloatingBubble().then(() => showToast("Manually Removed Bubble")).catch(() => showToast("Failed to remove"))
-  const onRequestPermission = () => requestPermission().then(() => showToast("Permission received")).catch(() => showToast("Failed to get permission"))
-  const onCheckPermissoin = () => checkPermission().then((value) => showToast(`Permission: ${value ? 'Yes' : 'No'}`)).catch(() => showToast("Failed to check"))
-  const onInit = () => initialize().then(() => showToast("Init")).catch(() => showToast("Failed init"));
+  const onAdd = () =>
+    showFloatingBubble().then(() => showToast('Add Floating Button'));
+  const onHide = () =>
+    hideFloatingBubble()
+      .then(() => showToast('Manually Removed Bubble'))
+      .catch(() => showToast('Failed to remove'));
+  const onRequestPermission = () =>
+    requestPermission()
+      .then(() => showToast('Permission received'))
+      .catch(() => showToast('Failed to get permission'));
+  const onCheckPermissoin = () =>
+    checkPermission()
+      .then((value) => showToast(`Permission: ${value ? 'Yes' : 'No'}`))
+      .catch(() => showToast('Failed to check'));
+  const onInit = () =>
+    initialize()
+      .then(() => showToast('Init'))
+      .catch(() => showToast('Failed init'));
+  const isBubble = () =>
+    isBubbleVisible()
+      .then(() => showToast('Visible'))
+      .catch(() => showToast('None'));
   useEffect(() => {
-    const subscriptionPress = DeviceEventEmitter.addListener("floating-bubble-press", function (e) {
-      showToast("Press Bubble")
-    });
-    const subscriptionRemove = DeviceEventEmitter.addListener("floating-bubble-remove", function (e) {
-      showToast("Remove Bubble")
-    });
+    const subscriptionPress = DeviceEventEmitter.addListener(
+      'floating-bubble-press',
+      function (e) {
+        showToast('Press Bubble');
+      }
+    );
+    const subscriptionRemove = DeviceEventEmitter.addListener(
+      'floating-bubble-remove',
+      function (e) {
+        showToast('Remove Bubble');
+      }
+    );
     return () => {
       subscriptionPress.remove();
       subscriptionRemove.remove();
-    }
-  }, [])
+    };
+  }, []);
   return (
     <Fragment>
       <StatusBar barStyle="dark-content" />
       <SafeAreaView>
         <ScrollView
           contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
+          style={styles.scrollView}
+        >
           <Header />
           <View style={{ padding: 30 }}>
             <Text>Check Permission</Text>
-            <Button style={styles.button} title="Check" onPress={onCheckPermissoin} />
+            <Button
+              style={styles.button}
+              title="Check"
+              onPress={onCheckPermissoin}
+            />
             <Text>Ger Permission</Text>
-            <Button style={styles.button} title="Get Permission" onPress={onRequestPermission} />
+            <Button
+              style={styles.button}
+              title="Get Permission"
+              onPress={onRequestPermission}
+            />
             <Text>Initialize Bubble Manage</Text>
             <Button style={styles.button} title="Initialize" onPress={onInit} />
             <Text>Add the bubble</Text>
             <Button style={styles.button} title="Add Bubble" onPress={onAdd} />
             <Text>Remove the bubble</Text>
-            <Button style={styles.button} title="Hide Bubble" onPress={onHide} />
+            <Button
+              style={styles.button}
+              title="Hide Bubble"
+              onPress={onHide}
+            />
+            <Text>Is Bubble visible</Text>
+            <Button title="Is Bubble" onPress={isBubble} />
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -98,7 +143,7 @@ const styles = StyleSheet.create({
     color: Colors.dark,
   },
   button: {
-    margin: 30
+    margin: 30,
   },
   highlight: {
     fontWeight: '700',
