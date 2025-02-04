@@ -16,7 +16,6 @@ import com.facebook.react.bridge.ReactMethod
 import com.txusballesteros.bubbles.BubbleLayout
 import com.txusballesteros.bubbles.BubblesManager
 
-//package com.reactlibrary;
 
 class FloatingBubbleModule
     (private val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
@@ -34,29 +33,39 @@ class FloatingBubbleModule
             reactContext.startActivity(launchIntent)
         }
     }
+    companion object {
+        var instance: FloatingBubbleModule? = null
+    }
+
+    init {
+        instance = this
+    }
 
     override fun getName(): String {
         return "FloatingBubble"
     }
 
-
-
     @ReactMethod // Notates a method that should be exposed to React
-    fun showFloatingBubble(x: Int, y: Int, promise: Promise) {
-     if (!isInitialized) {
+    fun showFloatingBubble(x: Int, y: Int) {
+        if (!isInitialized) {
             // If not initialized, queue the action
             pendingActions.add {
                 addNewBubble(x, y)
             }
-            promise.resolve("Initialization pending")
+            // promise.resolve("Initialization pending")
             return
         }
 
-        // If initialized, proceed with adding bubble
-        try {
-            this.addNewBubble(x, y)
-        } catch (e: Exception) {
-            promise.reject("Error adding bubble", e)
+    // If initialized, proceed with adding bubble
+        if(bubbleView != null) {
+            // promise.resolve("Bubble is existed.")
+            return
+        } else {
+            try {
+                this.addNewBubble(x, y)
+            } catch (e: Exception) {
+                // promise.reject("Error adding bubble", e)
+            }
         }
     }
 
@@ -120,7 +129,7 @@ class FloatingBubbleModule
             bubbleView!!.setOnBubbleClickListener {
                 sendEvent("floating-bubble-press") // Send event when bubble is clicked
             }
-            bubbleView!!.setShouldStickToWall(true) // Ensure bubble sticks to the wall
+            bubbleView!!.setShouldStickToWall(false) // Ensure bubble sticks to the wall
 
             // Add the new bubble to the BubblesManager at the specified position
             bubblesManager!!.addBubble(bubbleView, x, y)
@@ -173,7 +182,7 @@ class FloatingBubbleModule
                     // addNewBubble();
                     isInitialized = true;
                 }.build()
-            bubblesManager!!.initialize()
+        bubblesManager!!.initialize()
 
     }
 
