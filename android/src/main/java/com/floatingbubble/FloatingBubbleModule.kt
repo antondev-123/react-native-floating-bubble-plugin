@@ -15,7 +15,8 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.txusballesteros.bubbles.BubbleLayout
 import com.txusballesteros.bubbles.BubblesManager
-
+import com.floatingbubble.BubbleStateManager
+//package com.reactlibrary;
 
 class FloatingBubbleModule
     (private val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
@@ -23,6 +24,7 @@ class FloatingBubbleModule
     private var bubbleView: BubbleLayout? = null
     private var isInitialized: Boolean = false // Flag to track initialization
     private var pendingActions: MutableList<() -> Unit> = mutableListOf()
+    private val bubbleStateManager = BubbleStateManager(reactContext)
 
     @ReactMethod
     fun reopenApp() {
@@ -33,46 +35,43 @@ class FloatingBubbleModule
             reactContext.startActivity(launchIntent)
         }
     }
-    companion object {
-        var instance: FloatingBubbleModule? = null
-    }
-
-    init {
-        instance = this
-    }
 
     override fun getName(): String {
         return "FloatingBubble"
     }
 
+
+
     @ReactMethod // Notates a method that should be exposed to React
-    fun showFloatingBubble(x: Int, y: Int) {
-        if (!isInitialized) {
+    fun showFloatingBubble(x: Int, y: Int, promise: Promise) {
+     if (!isInitialized) {
             // If not initialized, queue the action
             pendingActions.add {
                 addNewBubble(x, y)
             }
-            // promise.resolve("Initialization pending")
+            promise.resolve("Initialization pending")
             return
         }
 
     // If initialized, proceed with adding bubble
-        if(bubbleView != null) {
-            // promise.resolve("Bubble is existed.")
-            return
-        } else {
-            try {
-                this.addNewBubble(x, y)
-            } catch (e: Exception) {
-                // promise.reject("Error adding bubble", e)
-            }
-        }
+    if(bubbleView != null) {
+        promise.resolve("Bubble is existed.")
+        return
+    } else {
+    try {
+        this.addNewBubble(x, y)
+        //bubbleStateManager.saveBubbleState(true);
+    } catch (e: Exception) {
+        promise.reject("Error adding bubble", e)
+    }
+    }
     }
 
     @ReactMethod // Notates a method that should be exposed to React
     fun hideFloatingBubble(promise: Promise) {
         try {
             this.removeBubble()
+            //bubbleStateManager.saveBubbleState(false);
             promise.resolve("")
         } catch (e: Exception) {
             promise.reject("")
@@ -107,6 +106,21 @@ class FloatingBubbleModule
     }
 
     @ReactMethod
+    fun restoreBubble() {
+        try {
+            val (isVisible, x, y) = this.bubbleStateManager.getBubbleState()
+            if (isVisible) {
+                addNewBubble(x, y)
+//                promise?.resolve("Bubble restored")
+            } else {
+//                promise?.resolve("No bubble to restore")
+            }
+        } catch (e: Exception) {
+//            promise.reject("Error restoring bubble", e)
+        }
+    }
+
+    @ReactMethod
     fun isBubbleVisible(promise: Promise) {
         try {
             val isVisible = bubbleView != null
@@ -124,6 +138,7 @@ class FloatingBubbleModule
             // Set up listeners and behaviors for the new bubble
             bubbleView!!.setOnBubbleRemoveListener {
                 bubbleView = null
+                //bubbleStateManager.saveBubbleState(false, x, y)
                 sendEvent("floating-bubble-remove") // Send event when bubble is removed
             }
             bubbleView!!.setOnBubbleClickListener {
@@ -182,7 +197,7 @@ class FloatingBubbleModule
                     // addNewBubble();
                     isInitialized = true;
                 }.build()
-        bubblesManager!!.initialize()
+            bubblesManager!!.initialize()
 
     }
 
