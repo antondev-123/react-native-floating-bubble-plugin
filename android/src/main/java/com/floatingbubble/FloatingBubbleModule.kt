@@ -197,7 +197,7 @@ class FloatingBubbleModule
                     // addNewBubble();
                     isInitialized = true;
                 }.build()
-            bubblesManager!!.initialize()
+        bubblesManager!!.initialize()
 
     }
 

@@ -1,6 +1,6 @@
 {
   "name": "react-native-floating-bubble-plugin",
-  "version": "1.0.72",
+  "version": "1.0.73",
   "description": "Floating Bubble Plugin for React Native",
   "source": "./src/index.tsx",
   "main": "./lib/commonjs/index.js",
