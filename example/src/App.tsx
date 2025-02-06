@@ -33,7 +33,6 @@ const showToast = (text: string) => ToastAndroid.show(text, 1000);
 
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
-
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
