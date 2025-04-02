@@ -6,8 +6,8 @@ const LINKING_ERROR =
   '- You rebuilt the app after installing the package\n' +
   '- You are not using Expo Go & React Native CLI\n';
 
-const FloatingBubble = NativeModules.FloatingBubble
-  ? NativeModules.FloatingBubble
+const FloatingBubblePlugin = NativeModules.FloatingBubblePlugin
+  ? NativeModules.FloatingBubblePlugin
   : new Proxy(
       {},
       {
@@ -16,20 +16,40 @@ const FloatingBubble = NativeModules.FloatingBubble
         },
       }
     );
-export const reopenApp = () => FloatingBubble.reopenApp();
 export const showFloatingBubble = (x = 50, y = 100) =>
-  FloatingBubble.showFloatingBubble(x, y);
-export const hideFloatingBubble = () => FloatingBubble.hideFloatingBubble();
-export const checkPermission = () => FloatingBubble.checkPermission();
-export const requestPermission = () => FloatingBubble.requestPermission();
-export const initialize = () => FloatingBubble.initialize();
-export const isBubbleVisible = () => FloatingBubble.isBubbleVisible();
+FloatingBubblePlugin.showFloatingBubble(x, y);
+export const hideFloatingBubble = () => FloatingBubblePlugin.hideFloatingBubble();
+export const checkPermission = () => FloatingBubblePlugin.checkPermission();
+export const requestPermission = () => FloatingBubblePlugin.requestPermission();
+export const initialize = () => FloatingBubblePlugin.initialize();
+// export const isBubbleVisible = () => FloatingBubblePlugin.isBubbleVisible();
+// export const setRestoreOnBoot = () => FloatingBubblePlugin.setRestoreOnBoot();
+// export const restoreBubble = () => FloatingBubblePlugin.restoreBubble();
+export const setRestoreOnBoot = async (restore: boolean) => {
+  try {
+    await FloatingBubblePlugin.setRestoreOnBoot(restore);
+    return true;
+  } catch (e) {
+    console.error('Error setting restore on boot:', e);
+    return false;
+  }
+};
+
+export const getBubbleState = async () => {
+  return await FloatingBubblePlugin.isBubbleVisible();
+};
+
+export const restoreBubbleIfNeeded = async () => {
+  return await FloatingBubblePlugin.restoreBubble();
+};
+
 export default {
   showFloatingBubble,
   hideFloatingBubble,
   requestPermission,
   checkPermission,
   initialize,
-  reopenApp,
-  isBubbleVisible,
+  getBubbleState,
+  setRestoreOnBoot,
+  restoreBubbleIfNeeded,
 };

@@ -24,9 +24,11 @@ import {
   showFloatingBubble,
   hideFloatingBubble,
   requestPermission,
-  initialize,
   checkPermission,
-  isBubbleVisible,
+  initialize,
+  getBubbleState,
+  setRestoreOnBoot,
+  restoreBubbleIfNeeded,
 } from 'react-native-floating-bubble-plugin';
 
 const showToast = (text: string) => ToastAndroid.show(text, 1000);
@@ -37,7 +39,8 @@ function App(): React.JSX.Element {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
   const onAdd = () =>
-    showFloatingBubble().then(() => showToast('Add Floating Button'));
+    showFloatingBubble(50, 100).then(() => showToast('Add Floating Button'));
+
   const onHide = () =>
     hideFloatingBubble()
       .then(() => showToast('Manually Removed Bubble'))
@@ -57,7 +60,7 @@ function App(): React.JSX.Element {
       .then(() => showToast('Init'))
       .catch(() => showToast('Failed init'));
   const isBubble = () =>
-    isBubbleVisible()
+    getBubbleState()
       .then((isVisible: boolean) => {
         if (isVisible) {
           showToast('Bubble is visible.');
